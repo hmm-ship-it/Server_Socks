@@ -1,0 +1,56 @@
+body {
+	/*#1d2635*/
+	background-color: #1d2635;
+	background-image: url("iterlyzeBG.gif");
+	background-image: url("iterlyzeBG.gif"),linear-gradient(to top ,#22222d,#1d2635);
+	background-size:cover;
+	background-repeat: no-repeat;
+	background-position: center ;
+	background-attachment: fixed;
+	font-family: "Verdana", "Courier New";
+	font-size:12px;
+	color: white;
+}
+a {
+	color: gray;
+}
+
+.CenterScreen{
+   position:fixed;
+   /*element can move on the screen (only screen, not page)*/
+
+   left:50%;top:50%;
+   /*set the top left corner of the element on the center of the screen*/
+
+   transform:translate(-50%,-50%);}
+   /*reposition element center with screen center*/
+
+.BottomScreen{
+	position:fixed;
+	left:2%;
+	bottom:0%;
+}
+
+.DropDown{
+	position: absolute;
+	display: inline-block;
+}
+/*.DropDown:hover .HiddenMenu {display:block;}*/
+.Menu{
+	opacity:1;
+	filter: alpha(opacity=100);
+}
+.Menu:hover{
+	opacity: .3;
+	filter: alpha(opacity=50);
+}
+.HiddenMenu{
+	display:block;
+	white-space:nowrap;
+	position: absolute;
+	bottom:-50px;
+	center:0px;
+}
+.HiddenMenu:hover{
+	display: block;
+}
