@@ -21,16 +21,20 @@ import os
 import Defs
 
 class Server_Socks:
-  'Defines a port and address to setup a server'
+  'Defines a socket, port and address, to setup a server.'
    
+   #These variables define the defaults. You should use the methods to access them.
   __host_addr = '127.0.0.1'
   __host_port = 8080
   __ASSET_DIRECTORY = 'WWW'
 
-  #@TODO: add parameters for add and port??? 
-  def __init__(self, runOptions=False, addr='127.0.0.1', port=8080):
-    self.launch_options(runOptions, addr, port)
+  # Constructor, designed essentially to run the lanch_options method
+  # Via the Server_Socks class itself, console, or from other code.
+  def __init__(self, noConfig=False, addr='127.0.0.1', port=8080):
+    self.launch_options(noConfig, addr, port)
 
+  # After starting up and doing the config, lets point python to another directory
+  # Maybe that will give it a bit more security?
   def _set_Working_Directory(self):
     try:
       __cwd = './' + self.__ASSET_DIRECTORY
@@ -43,26 +47,38 @@ class Server_Socks:
       os.chdir(__cwd)
       return __cwd
 
+  # Sets the server listening address
   def set_Addr(self, addr):
     self.__host_addr = addr
     print("setting address to : " + str(self.__host_addr))
 
+  # Get the server listening address
   def get_Addr(self):
     return self.__host_addr
    
+  # Set the port to listen on
   def set_Port(self, port):
     self.__host_port = port
     print("setting the port to: " + str(self.__host_port))
 
+  # Get the port that the server listens on
   def get_Port(self):
     return self.__host_port
 
+  # Set both the address and the port that the server listens on
   def set_Both(self, addr, port):
     self.set_Addr(addr)
     self.set_Port(port)
 
-  def launch_options(self, runOptions=False, addr='127.0.0.1', port=8080):
-    if(runOptions == False):
+  # Lanch options can be used several ways. 
+  # CASE 1) If no parameters are passed OR if noConfig is set to False.
+  # It will first search for a configuration file. If no config file is found it will then set the default values, or the user supplied values.
+  #
+  # CASE 2) noConfig is set to True.
+  # This will bring up a prompt, so that the user can enter in values they want to use. There is some code that will try auto set the ip for them.
+  # No guarantee that the auto config works, especially on systems with multiple interfaces.
+  def launch_options(self, noConfig=False, addr='127.0.0.1', port=8080):
+    if(noConfig == False):
       #Begin by searching for a configuration file
       try:
         for root, dirs, files in os.walk(os.getcwd()):
@@ -78,7 +94,7 @@ class Server_Socks:
       except:
         print('Read from config failed')
 
-    elif runOptions:
+    elif noConfig:
       print("Enter IP (v4) and port to listen on, or try to auto detect with auto: \n>addr port")
       cli = input()
        
@@ -105,7 +121,14 @@ class Server_Socks:
           print('invalid input')
 
     self.set_Both(addr,port)
+    self._set_Working_Directory()
 
+  # This creates a socket which is listened to.
+  # It won't be useful unless you do something with
+  # what you are listening to.
+  #@Todo: Potentially allows you to create several sockets to listen on,
+  #       if the ports and addr become some sort of list, or if you don't
+  #       care what the values are after a socket is created.
   def create_Server(self):
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     c.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)

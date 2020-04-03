@@ -20,6 +20,27 @@ class Http_Server(Server_Socks):
         self.create_http_server()
 
     #@Todo:
+    def accept_connection(self, c):
+        try:
+            c_socket, c_address = c.accept()
+            line_in = c_socket.recv(1024).decode('utf-8')
+            print(c_address, end=" ")
+            #cfile = c_socket.makefile('rw', 1024)
+            #line = cfile.readline().strip()
+            request = line_in.strip().split(' ')
+            print("Request: " + str(request[:3]))
+            status_code = request[0]
+            uri_get = request[1]
+            proto_ver = request[2]
+
+            #print(status_code + " " + uri_get + " " + proto_ver + "Is this spliting properly?")
+            return c_socket, request;
+        except:
+            print(" An error has occurred in processing the request")
+            ##cfile.close()
+            c_socket.close()
+            return 1;
+
     def sanitize_request(self, line):
         pass
     def get_request(self):
@@ -35,34 +56,19 @@ class Http_Server(Server_Socks):
     def create_http_server(self):
         c = self.create_Server()
         while 1:
-            try:
-                c_socket, c_address = c.accept()
-                line_in = c_socket.recv(1024).decode('utf-8')
-                print(c_address, end=" ")
-                #cfile = c_socket.makefile('rw', 1024)
-                #line = cfile.readline().strip()
-                request = line_in.strip().split(' ')
-                print("Request: " + str(request[:3]))
-                status_code = request[0]
-                uri_get = request[1]
-                proto_ver = request[2]
-
-                #print(status_code + " " + uri_get + " " + proto_ver + "Is this spliting properly?")
-           
-            except:
-                print(" An error has occurred in processing the request")
-                ##cfile.close()
-                c_socket.close()
+            c_socket, request = self.accept_connection(c)
+            print(request[0] + " this is the test")
+            if request[0] == 1:
                 continue
-           
-            if status_code == 'GET':
-                #print(uri_get + " uri_get")
-                if uri_get == '/':
-                    uri_get='./index.html'
+
+            elif request[0] == 'GET':
+                print(request[1] + " uri_get")
+                if request[1] == '/':
+                    uri_get = './index.html'
 
                 else:
                     try:
-                        uri_get = uri_get.split('?')[0]
+                        uri_get = request[1].split('?')[0]
                         uri_get = './' + str(uri_get).lstrip('/')
                         #print(uri_get + "  uri_get value")
                         #could possibly check for an empty string here in uri_get to set the default page
@@ -106,8 +112,9 @@ class Http_Server(Server_Socks):
                 c_socket.send(final_response)
                 c_socket.close()
 
-            except:
+            except Exception as e:
                 print(' Reading and sending the uri failed')
+                print(e)
                 continue
          
 
