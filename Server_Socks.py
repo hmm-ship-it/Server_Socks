@@ -18,6 +18,7 @@ This is a simple webserver based on the sockets library
 
 import socket
 import os
+import Defs
 
 class Server_Socks:
   'Defines a port and address to setup a server'

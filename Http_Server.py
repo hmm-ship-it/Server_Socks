@@ -11,6 +11,7 @@ This is an extention of Server_Socks that implements an http server
 
 from Server_Socks import Server_Socks
 import os
+import Defs
 
 class Http_Server(Server_Socks):
 
