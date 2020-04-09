@@ -6,6 +6,8 @@ This file contains definitions used by this project
 @License Copyright Alex Khristov
 '''
 
+from datetime import datetime
+
 # HTTP/1.0
 HTTP_10 = {
     'status_200': 'HTTP/1.0 200 OK',
@@ -101,3 +103,16 @@ MIME_TYPES = {
     '.webmanifest': 'application/manifest+json',
     '': 'text/html'
 }
+
+class http_header:
+    
+    def __init__(self, http_status, content_type, content_length):
+        self.http_status = http_status
+        self.content_type = 'Content-Type: ' + content_type
+        self.server = 'Server: Server_Socks/0.1'
+        self.date = datetime.strftime(datetime.utcnow(), 'Date: %a, %d %b %Y %H:%M:%S GMT')
+        self.content_length = 'Content-Length: ' + str(content_length)
+
+    def to_string(self):
+        return self.http_status + '\n' + self.content_type + '\n' \
+            + self.server + '\n' + self.date + '\n' + self.content_length + '\n\n'

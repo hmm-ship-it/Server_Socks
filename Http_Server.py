@@ -15,6 +15,7 @@ from Server_Socks import Server_Socks
 import hashlib
 import os
 import Defs
+from Defs import http_header
 #from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import time
@@ -68,6 +69,10 @@ class Http_Server(Server_Socks):
             print(e)
 
     def get_request(self, request_hash, c_socket):
+
+        # set up variable for the response test later
+        response = bytes("is_null", 'utf-8')
+
         try:
             if request_hash.hexdigest() in self._get_File_Index():
                 indexed_request_is = '.' + self._get_File_Index()[request_hash.hexdigest()].rstrip()
@@ -87,14 +92,17 @@ class Http_Server(Server_Socks):
             log.info('reading file to send failed }')
             
         try:
-            header = Defs.HTTP_10['status_200'] + "\n" + 'Content-Type: ' + Defs.MIME_TYPES[mime] + '\n\n'
+            header = http_header(Defs.HTTP_11['status_200'], Defs.MIME_TYPES[mime], len(response))
         except Exception as e:
-            log.debug('Header failed, likely invalid mime type. Add appropriate mime to defs.py }')
-            header = Defs.HTTP_10['status_200'] + "\n" + 'Content-Type: ' + Defs.MIME_TYPES['.html'] + '\n\n'
 
-        final_response = header.encode('utf-8') + response
-        c_socket.send(final_response)
-        c_socket.close()
+            log.debug('Header failed, likely invalid mime type. Add appropriate mime to defs.py }')
+            header = http_header(Defs.HTTP_11['status_200'], Defs.MIME_TYPES['.html'], len(response))
+
+        # test for valid response
+        if response != b'is_null':
+            final_response = header.to_string().encode('utf-8') + response
+            c_socket.send(final_response)
+            c_socket.close()
 
 
         return
