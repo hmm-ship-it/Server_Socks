@@ -40,9 +40,9 @@ class Http_Server(Server_Socks):
             c_socket, c_address = c.accept()
             line_in = c_socket.recv(1024).decode('utf-8')
             print(c_address, end=" ")
-            log.info("%s }", str(c_address))
+            log.info("%s }", )
             request = line_in.strip().split(' ')
-            log.info("Request: %s }", str(request[:3]))
+            log.info("%s Request: %s }", str(c_address),str(request[:3]))
             #status_code = request[0]
             #uri_get = request[1]
             #proto_ver = request[2]
