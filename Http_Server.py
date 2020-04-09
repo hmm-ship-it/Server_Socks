@@ -5,7 +5,7 @@ This is an extention of Server_Socks that implements an http server
 @Date MAR 20 2020
 @License GPLv2
 '''
-#@TODO: Clean-up logging events, and write them to standard error, put standard error into a logfile.
+#@TODO: Log exceptions
 #@TODO: It works, but basically just for the default case. Make sure it works for everything.
 #@TODO: Enforce stricter scope on things. 
 #@TODO: Make a maximum thread count.
@@ -39,15 +39,16 @@ class Http_Server(Server_Socks):
             c_socket, c_address = c.accept()
             line_in = c_socket.recv(1024).decode('utf-8')
             print(c_address, end=" ")
-            log.info("%s ", str(c_address))
+            log.info("%s }", str(c_address))
             request = line_in.strip().split(' ')
-            print("Request: " + str(request[:3]))
+            log.info("Request: %s }", str(request[:3]))
             #status_code = request[0]
             #uri_get = request[1]
             #proto_ver = request[2]
             return c_socket, request;
         except Exception as socket_accept_error:
-            print(" An error has occurred in processing the request")
+            log.warning(" An error has occurred in processing the connection attempt }")
+            #There was some other code for how to log exceptions that I should look at
             print(socket_accept_error)
             c_socket.close()
             return 1;
@@ -63,7 +64,8 @@ class Http_Server(Server_Socks):
             else:
                 return 1
         except Exception as e:
-            print('Sanitize/Hash Failed: ' + e)
+            log.debug('Sanitize/Hash Failed: }')
+            print(e)
 
     def get_request(self, request_hash, c_socket):
         try:
@@ -74,19 +76,20 @@ class Http_Server(Server_Socks):
                 indexed_request_is = '.' + '/index.html'
                 mime = '.html'
         except Exception as hash_fail:
-            print('Get_Request Failed ' + hash_fail)
+            log.info('Finding indexed page & default to serve failed }')
+            print(hash_fail)
 
         try:
             get_file = open(str(indexed_request_is), 'rb')
             response = get_file.read()
             get_file.close()
         except:
-            print('reading file failed')
+            log.info('reading file to send failed }')
             
         try:
             header = Defs.HTTP_10['status_200'] + "\n" + 'Content-Type: ' + Defs.MIME_TYPES[mime] + '\n\n'
         except Exception as e:
-            print('Header failed, likely invalid mime type. Add appropriate mime to defs.py')
+            log.debug('Header failed, likely invalid mime type. Add appropriate mime to defs.py }')
             header = Defs.HTTP_10['status_200'] + "\n" + 'Content-Type: ' + Defs.MIME_TYPES['.html'] + '\n\n'
 
         final_response = header.encode('utf-8') + response
@@ -100,9 +103,6 @@ class Http_Server(Server_Socks):
         pass
     def post_request(self):
         pass
-
-        #umm remove this?
-        return uri
 
     def process_Connection(self, c):
         c_socket, request = self.accept_connection(c)
@@ -135,7 +135,7 @@ if __name__=='__main__':
     console.setFormatter(logFormat)
 
     root = log.getLogger()
-    root.setLevel(os.environ.get("LOGLEVEL","INFO"))
+    root.setLevel(os.environ.get("LOGLEVEL","DEBUG"))
     root.addHandler(console)
     root.addHandler(logFile)
     
