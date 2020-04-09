@@ -3,22 +3,21 @@
 This is a simple webserver based on the sockets library
 @Author Tim Hanneman
 @Date MAR 19 2020
-@License Copyright Tim Hanneman
+@License Copyright GPLv2
 
-@TODO: Split the createServer code into the creation of a socket and the type of server. Make a subclasses that define the server type.
-@TODO: The default, acceptance and sending of objects needs improvement, seems to randomly fail sometimes
+@TODO: Make subclasses that define the server type.
 @TODO: Add a way for the server to be shutdown gracefully
-@TODO: Sanitize web requests better for invalid input.
-@TODO needs to be threaded, and test out how it fails.
-@TODO: Can I chroot jail it?
+@TODO: How should I jail this code?
 @TODO: Get commandline arguments for setting ip and port
-#DONE? Security audit, make sure it can only access files within it's directory.
-#Seems like it is pretty resistant to accessing other parts of the hd. There might be ways around that though.
+@TODO: Don't rebuild the index every server restart....
+@TODO: Make the build_Index code more flexible..and protected
 '''
 
 import socket
 import os
 import Defs
+import hashlib
+import logging as log
 
 class Server_Socks:
   'Defines a socket, port and address, to setup a server.'
@@ -27,22 +26,31 @@ class Server_Socks:
   __host_addr = '127.0.0.1'
   __host_port = 8080
   __ASSET_DIRECTORY = 'WWW'
+  __SOCK_DRAWER_FILE_INDEX = {}
+
+  ##Maybe this will work for logging???
+  opticon = log.getLogger(__name__)
 
   # Constructor, designed essentially to run the lanch_options method
   # Via the Server_Socks class itself, console, or from other code.
   def __init__(self, noConfig=False, addr='127.0.0.1', port=8080):
+    #log.basicConfig(format='%(levelname)s - %(asctime)s - %(message)s', level=log.INFO)
+    #self._start_Log()
+    log.warning('Server starting up.}')
+    self._build_Index()
+    self._set_File_Index()
     self.launch_options(noConfig, addr, port)
 
-  # After starting up and doing the config, lets point python to another directory
+  # After starting up and doing the config, let's point python to another directory
   # Maybe that will give it a bit more security?
   def _set_Working_Directory(self):
     try:
       __cwd = './' + self.__ASSET_DIRECTORY
-      print('Changing working directory to' + __cwd)
+      log.warning('Changing working directory to %s}', __cwd)
       os.chdir(__cwd)
       return __cwd
     except:
-      print('Setting the working directory failed. Is this Windows?')
+      log.warning('Setting the working directory failed. Is this Windows?}')
       __cwd = '.\\' + self.__ASSET_DIRECTORY
       os.chdir(__cwd)
       return __cwd
@@ -50,7 +58,8 @@ class Server_Socks:
   # Sets the server listening address
   def set_Addr(self, addr):
     self.__host_addr = addr
-    print("setting address to : " + str(self.__host_addr))
+    #print("setting address to : " + str(self.get_Addr()) + "}")
+    log.info("setting address to : %s}", self.get_Addr())
 
   # Get the server listening address
   def get_Addr(self):
@@ -59,7 +68,8 @@ class Server_Socks:
   # Set the port to listen on
   def set_Port(self, port):
     self.__host_port = port
-    print("setting the port to: " + str(self.__host_port))
+    #print("setting the port to: " + str(self.get_Port()) + "}")
+    log.info("setting the port to: %s}", str(self.get_Port()))
 
   # Get the port that the server listens on
   def get_Port(self):
@@ -70,7 +80,45 @@ class Server_Socks:
     self.set_Addr(addr)
     self.set_Port(port)
 
-  # Lanch options can be used several ways. 
+  # Get the server files to serve index
+  def _get_File_Index(self):
+    return self.__SOCK_DRAWER_FILE_INDEX
+
+  # Set the server files index
+  def _set_File_Index(self):
+    try:
+      with open("sock_drawer.index", "r") as fi:
+        for line in fi:
+          (key, value)=line.split(',')
+          self.__SOCK_DRAWER_FILE_INDEX[key]=value
+        fi.close()
+    except Exception as e:
+      log.error('Setting the file index failed for some reason}')
+
+  #This will build an index of files to serve.
+  #WARNING THIS MUST BE RUN BEFORE ANYTHING ELSE...OTHERWISE IT WILL TRAVERSE
+  #SOME RANDOM DIRECTORY.
+  def _build_Index(self):
+    log.info('rebuilding index}')
+    try:
+      log.info('removing any prior index}')
+      os.remove("sock_drawer.index")
+    except:
+      log.info('Creating new index file}')
+
+    f = open("sock_drawer.index", "a")
+    cut_at = self.__ASSET_DIRECTORY+'/'
+    crawl = os.getcwd() + '/' + cut_at
+    for directory_name, sub_dir_list, fileList in os.walk(crawl):
+      folder=directory_name.split(cut_at,1)
+      for _ in fileList:
+        name = (folder[-1]+'/'+_).encode()
+        hashis = hashlib.sha512(name).hexdigest() + ',' + folder[-1]+'/'+_+'\n';
+        f.write(hashis)
+    f.close()
+
+  # Launch options can be used several ways. 
+  #
   # CASE 1) If no parameters are passed OR if noConfig is set to False.
   # It will first search for a configuration file. If no config file is found it will then set the default values, or the user supplied values.
   #
@@ -83,7 +131,7 @@ class Server_Socks:
       try:
         for root, dirs, files in os.walk(os.getcwd()):
           if '.config' in files:
-            print('Starting from configuration file: ')
+            log.info('Starting from configuration file: }')
             cfg = open('.config')
             addr, port = cfg.readline().split()
             self.set_Both(addr, int(port))
@@ -92,7 +140,7 @@ class Server_Socks:
             return
 
       except:
-        print('Read from config failed')
+        log.warning('Read from config failed}')
 
     elif noConfig:
       print("Enter IP (v4) and port to listen on, or try to auto detect with auto: \n>addr port")
@@ -102,12 +150,13 @@ class Server_Socks:
         try:
           addr = socket.gethostbyname(socket.gethostname())
           self.set_Both(addr, 8080)
-          print('IP to use is:' + self.get_Addr() + " and the port will be " + str(self.get_Port()))
+          #print('IP to use is:' + self.get_Addr() + " and the port will be " + str(self.get_Port()))
+          log.info('IP to use is: %s and the port will be %s}', self.get_Addr(),str(self.get_Port()))
           self._set_Working_Directory()
           return
 
         except:
-          print('auto-config failed')
+          log.warning('auto-config failed}')
           print("Enter IP (v4) and port to listen on, or try to auto detect with auto: \n>addr port")
           cli = input()
       else:
@@ -118,7 +167,7 @@ class Server_Socks:
           return
 
         except:
-          print('invalid input')
+          log.info('invalid user input for starting config}')
 
     self.set_Both(addr,port)
     self._set_Working_Directory()
@@ -149,6 +198,23 @@ if __name__ == '__main__':
 #if((len(sys.argv)>0) and (len(sys.argv)<4)):
 #arg_List = str(sys.argv).split()
 #server = Server_Socks(bool(arg_List[0]),arg_List[1],int(arg_List[2]))
+  
+    
+  #opticon = log.getLogger()
+
+  logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')
+
+  #logFile = log.FileHandler("serverInteractions.log".format('~/', 'test_log1'))
+  #logFile.setFormatter(logFormat)
+  #logFile.setLevel(log.DEBUG)
+  #opticon.addHandler(logFile)
+  console = log.StreamHandler()
+  console.setFormatter(logFormat)
+  root = logging.getLogger()
+  root.setLevel(os.environ.get("LOGLEVEL","INFO"))
+  root.addHandler(console)
+  #console.setLevel(log.INFO)
+  #opticon.addHandler(console)
 
   server = Server_Socks(True)
   server.create_Server

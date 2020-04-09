@@ -80,7 +80,10 @@ HTTP_11 = {                                                     # Defined in...
 
 #MIME types
 MIME_TYPES = {
-    '.jpg': 'image/jpg',
+    '.jpg': 'image/jpeg',
+    '.js': 'text/javascript',
+    '.jpeg': 'image/jpeg',
+    '.pdf': 'application/pdf',
     '.css': 'text/css',
     '.png': 'image/png',
     '.svg': 'image/svg',
@@ -88,5 +91,13 @@ MIME_TYPES = {
     '.midi': 'audio/sp-midi',
     '.mp3': 'audio/mpeg',
     '.ogg': 'audio/ogg',
-    '': 'text/html',
+    '.html': 'text/html',
+    '.txt': 'text/plain',
+    '.webm': 'video/webm',
+    '.xhtml': 'application/xhtml+xml',
+    '.ico': '/image/vnd.microsoft.icon',
+    '.xml': 'application/xml',
+    '.svg': 'image/svg+xml',
+    '.webmanifest': 'application/manifest+json',
+    '': 'text/html'
 }
