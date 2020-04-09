@@ -18,10 +18,10 @@ import Defs
 #from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import time
-import logging
+import logging as log
 
 class Http_Server(Server_Socks):
-    log = logging.getLogger(__name__)
+    opticon = log.getLogger(__name__)
 
     def __init__(self, runOptions=False, addr='127.0.0.1', port=8080):
         
@@ -128,4 +128,15 @@ class Http_Server(Server_Socks):
             t1.join()
 
 if __name__=='__main__':
+    logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')
+    logFile = log.FileHandler("serverInteractions.log".format('~/', 'test_log1'))
+    logFile.setFormatter(logFormat)
+    console = log.StreamHandler()
+    console.setFormatter(logFormat)
+
+    root = log.getLogger()
+    root.setLevel(os.environ.get("LOGLEVEL","INFO"))
+    root.addHandler(console)
+    root.addHandler(logFile)
+    
     sock = Http_Server(True)

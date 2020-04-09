@@ -204,16 +204,22 @@ if __name__ == '__main__':
 
   logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')
 
-  #logFile = log.FileHandler("serverInteractions.log".format('~/', 'test_log1'))
-  #logFile.setFormatter(logFormat)
+ 
+
   #logFile.setLevel(log.DEBUG)
-  #opticon.addHandler(logFile)
+
+
+  logFile = log.FileHandler("serverInteractions.log".format('~/', 'test_log1'))
+  logFile.setFormatter(logFormat)
   console = log.StreamHandler()
   console.setFormatter(logFormat)
-  root = logging.getLogger()
+
+  root = log.getLogger()
   root.setLevel(os.environ.get("LOGLEVEL","INFO"))
   root.addHandler(console)
-  #console.setLevel(log.INFO)
+  root.addHandler(logFile)
+
+  #console.setLevel(os.environ.get("LOGLEVEL","INFO"))
   #opticon.addHandler(console)
 
   server = Server_Socks(True)
