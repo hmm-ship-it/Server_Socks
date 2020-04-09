@@ -3,14 +3,14 @@
 This is a simple webserver based on the sockets library
 @Author Tim Hanneman
 @Date MAR 19 2020
-@License Copyright GPLv2
+@License GPLv2
 
 @TODO: Make subclasses that define the server type.
-@TODO: Add a way for the server to be shutdown gracefully
-@TODO: How should I jail this code?
-@TODO: Get commandline arguments for setting ip and port
-@TODO: Don't rebuild the index every server restart....
-@TODO: Make the build_Index code more flexible..and protected
+@TODO: Add a way for the server to be shut down gracefully
+@TODO: Q: How should I jail this code? A: Make it commit an exceptional crime.
+@TODO: Get command-line arguments for setting the IP and port
+@TODO: Don't rebuild the index every server restart.... .... ....
+@TODO: Make the build_Index code more flexible...and protected
 '''
 
 import socket

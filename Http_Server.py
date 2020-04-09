@@ -36,12 +36,14 @@ class Http_Server(Server_Socks):
         self.create_http_server()
 
     def accept_connection(self, c):
+        ## Be sure to update this method in parallel with 'update_request'
         try:
             c_socket, c_address = c.accept()
             line_in = c_socket.recv(1024).decode('utf-8')
             print(c_address, end=" ")
             log.info("%s }", )
-            request = line_in.strip().split(' ')
+            full_request = line_in.strip().split('\r\n')
+            request = full_request[0].split(' ')
             log.info("%s Request: %s }", str(c_address),str(request[:3]))
             #status_code = request[0]
             #uri_get = request[1]
@@ -53,6 +55,19 @@ class Http_Server(Server_Socks):
             print(socket_accept_error)
             c_socket.close()
             return 1;
+
+    def update_request(self, c_socket):
+        ## Be sure to update this method in parallel with 'accept_connection'
+        line_in = c_socket.recv(1024).decode('utf-8')
+        print(c_address, end=" ")
+        log.info("%s }", )
+        full_request = line_in.strip().split('\r\n')
+        request = full_request[0].split(' ')
+        log.info("%s Request: %s }", str(c_address),str(request[:3]))
+        #status_code = request[0]
+        #uri_get = request[1]
+        #proto_ver = request[2]
+        return request, full_request;
 
     def sanitize_request(self, request):
         try:
