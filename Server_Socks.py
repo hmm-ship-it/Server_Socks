@@ -11,6 +11,7 @@ This is a simple webserver based on the sockets library
 @TODO: Get commandline arguments for setting ip and port
 @TODO: Don't rebuild the index every server restart....
 @TODO: Make the build_Index code more flexible..and protected
+@TODO: Create modules with known types of vulnerabilities for cyber security practice
 '''
 
 import socket
@@ -198,16 +199,9 @@ if __name__ == '__main__':
 #if((len(sys.argv)>0) and (len(sys.argv)<4)):
 #arg_List = str(sys.argv).split()
 #server = Server_Socks(bool(arg_List[0]),arg_List[1],int(arg_List[2]))
-  
-    
-  #opticon = log.getLogger()
+
 
   logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')
-
- 
-
-  #logFile.setLevel(log.DEBUG)
-
 
   logFile = log.FileHandler("serverInteractions.log".format('~/', 'test_log1'))
   logFile.setFormatter(logFormat)
@@ -218,9 +212,6 @@ if __name__ == '__main__':
   root.setLevel(os.environ.get("LOGLEVEL","INFO"))
   root.addHandler(console)
   root.addHandler(logFile)
-
-  #console.setLevel(os.environ.get("LOGLEVEL","INFO"))
-  #opticon.addHandler(console)
 
   server = Server_Socks(True)
   server.create_Server
