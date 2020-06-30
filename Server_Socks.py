@@ -3,7 +3,7 @@
 This is a simple webserver based on the sockets library
 @Author Tim Hanneman
 @Date MAR 19 2020
-@License Copyright GPLv2
+@License GPLv2
 
 @TODO: Make subclasses that define the server type.
 @TODO: Add a way for the server to be shutdown gracefully
@@ -12,7 +12,6 @@ This is a simple webserver based on the sockets library
 @TODO: Don't rebuild the index every server restart....
 @TODO: Make the build_Index code more flexible..and protected
 @TODO: Create modules with known types of vulnerabilities for cyber security practice
-'''
 
 import socket
 import os

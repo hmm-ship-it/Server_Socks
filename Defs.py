@@ -2,8 +2,8 @@
 '''
 This file contains definitions used by this project
 @Author Alex Khristov
-@Date 30 MAR 2020
-@License Copyright Alex Khristov
+@Date 09 APR 2020
+@License GPLv2
 '''
 
 from datetime import datetime
@@ -105,7 +105,7 @@ MIME_TYPES = {
 }
 
 class http_header:
-    
+
     def __init__(self, http_status, content_type, content_length):
         self.http_status = http_status
         self.content_type = 'Content-Type: ' + content_type
