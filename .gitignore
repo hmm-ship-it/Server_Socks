@@ -3,3 +3,14 @@
 ################################################################################
 
 /.vs/Personal/v16/.suo
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/__pycache__/Defs.cpython-37.pyc
+/__pycache__/Server_Socks.cpython-37.pyc
+/serverInteractions.log
+/sock_drawer.index
+/.gitignore
+/WWW/sock_drawer.index
+/.vs/PythonSettings.json
+/__pycache__/Defs.cpython-38.pyc
+/__pycache__/Server_Socks.cpython-38.pyc

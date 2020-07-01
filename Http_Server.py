@@ -8,6 +8,8 @@ This is an extention of Server_Socks that implements an http server
 #@TODO: It works, but basically just for the default case. Make sure it works for everything.
 #@TODO: Enforce stricter scope on things.
 #@TODO: Upgrade to httpv2 at some point, track timeouts for more efficient server/socket resource usage.
+#@TODO: (Use stateful connection for multiple transfers)
+#@TODO: Load index into RAM so it doesn't need to always read the file. (Maybe as an exception try and look for a file)
 
 from Server_Socks import Server_Socks
 import hashlib
@@ -46,30 +48,39 @@ class Http_Server(Server_Socks):
             #status_code = request[0]
             #uri_get = request[1]
             #proto_ver = request[2]
-            #raise Exception('BAD')
+            raise Exception('BAD')
 
         except Exception as socket_accept_error:
             log.warning(" An error has occurred in processing the connection attempt }")
+            log.warning(socket_accept_error)
             #There was some other code for how to log exceptions that I should look at
             print(socket_accept_error)
-            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            # c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
             c_socket.close()
             return 'Error';
 
         request_type, sani = self.sanitize_request(request)
 
         if request_type == 'UNK':
-            log.warning(" An error has occurred in the request type}")
-            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            log.debug(" An error has occurred in the request type}")
+            try:
+                c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            except Exception as socket_error:
+                log.debug("Unexpected socket error")
             c_socket.close()
             return 'Error';
         elif request_type == 'GET':
             self.get_request(sani, c_socket)
             c_socket.close()
             return;
+
+        #I don't think this code should ever run
         else:
             log.info("Unrecognized request type}")
-            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            try:
+                c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            except Exception as socket_error:
+                log.debug("Unexpected socket error")
             c_socket.close()
             return 'Error';
 
@@ -83,18 +94,25 @@ class Http_Server(Server_Socks):
         log.info("%s Request: %s }", str(c_address),str(request[:3]))
         return request, full_request;
 
+    # This has problems when GET also has nothing with it
     def sanitize_request(self, request):
         try:
             if request[0]== 'GET':
-                request_b = str(request[1]).encode()
-                request_hash = hashlib.sha512(request_b)
+                if request[1]:
+                    request_b = str(request[1]).encode()
+                    request_hash = hashlib.sha512(request_b)
                 return 'GET', request_hash
             else:
-                return 'GET','UNK'
+                request_b = str("/index.html").encode()
+                request_hash = hashlib.sha512(request_b)
+                return 'GET', request_hash
+
         except Exception as e:
             log.debug('Sanitize/Hash Failed: }')
             print(e)
-            return 'UNK','UNK'
+            request_b = str("/index.html").encode()
+            request_hash = hashlib.sha512(request_b)
+            return 'GET', request_hash
 
     def get_request(self, request_hash, c_socket):
 
@@ -118,7 +136,7 @@ class Http_Server(Server_Socks):
             response = get_file.read()
             get_file.close()
         except:
-            log.info('reading file to send failed }')
+            log.debug('reading file to send failed }')
             return 'Error'
             
         try:
