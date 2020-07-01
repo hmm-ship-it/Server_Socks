@@ -1,8 +1,0 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/__pycache__
-/.vs/Personal/v16/.suo
-/serverInteractions.log
-/sock_drawer.index
