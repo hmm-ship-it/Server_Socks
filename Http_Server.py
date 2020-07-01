@@ -5,10 +5,8 @@ This is an extention of Server_Socks that implements an http server
 @Date MAR 20 2020
 @License GPLv2
 '''
-#@TODO: Log exceptions
 #@TODO: It works, but basically just for the default case. Make sure it works for everything.
-#@TODO: Enforce stricter scope on things. 
-#@TODO: Make a maximum thread count.
+#@TODO: Enforce stricter scope on things.
 #@TODO: Upgrade to httpv2 at some point, track timeouts for more efficient server/socket resource usage.
 
 from Server_Socks import Server_Socks
@@ -23,6 +21,7 @@ import logging as log
 
 class Http_Server(Server_Socks):
     opticon = log.getLogger(__name__)
+    _thread_count = 0
 
     def __init__(self, runOptions=False, addr='127.0.0.1', port=8080):
         
@@ -40,22 +39,39 @@ class Http_Server(Server_Socks):
         try:
             c_socket, c_address = c.accept()
             line_in = c_socket.recv(1024).decode('utf-8')
-            print(c_address, end=" ")
-            request = line_in.strip().split(' ')
-            #log.info("%s }", )
-            #full_request = line_in.strip().split('\r\n')
-            #request = full_request[0].split(' ')
+            full_request = line_in.strip().split('\r\n')
+            request = full_request[0].split(' ')
             log.info("%s Request: %s }", str(c_address),str(request[:3]))
+
             #status_code = request[0]
             #uri_get = request[1]
             #proto_ver = request[2]
-            return c_socket, request;
+            #raise Exception('BAD')
+
         except Exception as socket_accept_error:
             log.warning(" An error has occurred in processing the connection attempt }")
             #There was some other code for how to log exceptions that I should look at
             print(socket_accept_error)
+            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
             c_socket.close()
-            return 1;
+            return 'Error';
+
+        request_type, sani = self.sanitize_request(request)
+
+        if request_type == 'UNK':
+            log.warning(" An error has occurred in the request type}")
+            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            c_socket.close()
+            return 'Error';
+        elif request_type == 'GET':
+            self.get_request(sani, c_socket)
+            c_socket.close()
+            return;
+        else:
+            log.info("Unrecognized request type}")
+            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
+            c_socket.close()
+            return 'Error';
 
     def update_request(self, c_socket):
         ## Be sure to update this method in parallel with 'accept_connection'
@@ -65,24 +81,20 @@ class Http_Server(Server_Socks):
         full_request = line_in.strip().split('\r\n')
         request = full_request[0].split(' ')
         log.info("%s Request: %s }", str(c_address),str(request[:3]))
-        #status_code = request[0]
-        #uri_get = request[1]
-        #proto_ver = request[2]
         return request, full_request;
 
     def sanitize_request(self, request):
         try:
-            if request[0]==1:
-                return 1
-            elif request[0]== 'GET':
+            if request[0]== 'GET':
                 request_b = str(request[1]).encode()
                 request_hash = hashlib.sha512(request_b)
-                return request_hash
+                return 'GET', request_hash
             else:
-                return 1
+                return 'GET','UNK'
         except Exception as e:
             log.debug('Sanitize/Hash Failed: }')
             print(e)
+            return 'UNK','UNK'
 
     def get_request(self, request_hash, c_socket):
 
@@ -99,6 +111,7 @@ class Http_Server(Server_Socks):
         except Exception as hash_fail:
             log.info('Finding indexed page & default to serve failed }')
             print(hash_fail)
+            return 'Error'
 
         try:
             get_file = open(str(indexed_request_is), 'rb')
@@ -106,6 +119,7 @@ class Http_Server(Server_Socks):
             get_file.close()
         except:
             log.info('reading file to send failed }')
+            return 'Error'
             
         try:
             header = http_header(Defs.HTTP_11['status_200'], Defs.MIME_TYPES[mime], len(response))
@@ -120,7 +134,6 @@ class Http_Server(Server_Socks):
             c_socket.send(final_response)
             c_socket.close()
 
-
         return
 
     def head_request(self):
@@ -128,28 +141,18 @@ class Http_Server(Server_Socks):
     def post_request(self):
         pass
 
-    def process_Connection(self, c):
-        c_socket, request = self.accept_connection(c)
-        #If there is an error in accepting the request return.
-        if request[0] == 1:
-            c_socket.send(Defs.HTTP_10['status_501'].encode('utf-8'))
-            c_socket.close()
-            return 1
-        else:
-            self.get_request(self.sanitize_request(request),c_socket)
-        c_socket.close()
-
     def create_http_server(self):
 
         threads_list = []
         c = self.create_Server()
 
         while 1:
-            #print('New Thread btw')
-            t1 = threading.Thread(target=self.process_Connection, args=(c,))
-            threads_list.append(t1)
-            t1.start()
-            t1.join()
+            _thread_count = threading.enumerate()
+            if len(_thread_count) < 50:
+                t1 = threading.Thread(target=self.accept_connection, args=(c,))
+                threads_list.append(t1)
+                t1.start()
+                #t1.join()
 
 if __name__=='__main__':
     logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')
