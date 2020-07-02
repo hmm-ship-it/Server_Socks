@@ -41,6 +41,7 @@ class Http_Server(Server_Socks):
         try:
             c_socket, c_address = c.accept()
             line_in = c_socket.recv(1024).decode('utf-8')
+            #log.warning(c_socket) Sometimes invalid bytes are sent through the decoder. This is a weakness if there is an exploit for it.
             full_request = line_in.strip().split('\r\n')
             request = full_request[0].split(' ')
             log.info("%s Request: %s }", str(c_address),str(request[:3]))
@@ -48,7 +49,7 @@ class Http_Server(Server_Socks):
             #status_code = request[0]
             #uri_get = request[1]
             #proto_ver = request[2]
-            raise Exception('BAD')
+            #raise Exception('BAD')
 
         except Exception as socket_accept_error:
             log.warning(" An error has occurred in processing the connection attempt }")
