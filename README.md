@@ -13,4 +13,4 @@ It can be launched by running "Python3 Http_Server.py"
 At the prompt enter the IP address and port number that you would like it to listen on.
 e.g. "127.0.0.1 8080"
 
-If there are any problems with accessing it via a public ip address be sure to check that a firewall, or (if you are using a home router) that port forwarding is enabled.
+If there are any problems with accessing it via a public ip address be sure to check that a firewall is not blocking connections, or (if you are using a home router) that port forwarding is enabled.
