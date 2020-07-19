@@ -15,7 +15,6 @@ class Accept_Connection():
         opticon = log.getLogger(__name__)
 
     def accept(c):
-        #, server, sani_obj, get_obj
         ## Be sure to update this method in parallel with 'update_request'
         try:
             c_socket, c_address = c.accept()

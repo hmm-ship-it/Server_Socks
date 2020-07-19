@@ -10,11 +10,6 @@ This module processes a get request. Checks the index, and sends a webpage
 import logging as log
 import hashlib
 
-#Change this...
-#import os, sys
-#sys.path.append('D:\Programing\Personal\Server Socks')
-#import Defs
-print('__file__={0:<35} | __name__={1:<25} | __package__={2:<25}'.format(__file__,__name__,str(__package__)))
 from .. import Defs
 
 class Get_Request():

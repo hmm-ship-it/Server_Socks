@@ -1,4 +1,5 @@
-class Update_Request(c_socket):
+class Update_Request():
+    def update_request(c_socket):
         ## Be sure to update this method in parallel with 'accept_connection'
         line_in = c_socket.recv(1024).decode('utf-8')
         print(c_address, end=" ")

@@ -15,11 +15,10 @@ This is an extention of Server_Socks that implements an http server
 from Server_Socks import Server_Socks
 import hashlib
 import os
-import modules.Defs
 from modules.Defs import http_header
 #from multiprocessing.dummy import Pool as ThreadPool
 import threading
-import time
+#import time
 import logging as log
 
 from modules.accept.Accept_Connection import Accept_Connection
