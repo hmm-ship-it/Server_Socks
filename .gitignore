@@ -20,3 +20,7 @@
 /modules/sanitize/__pycache__
 /modules/requests/__pycache__
 /modules/accept/__pycache__
+*.pyproj
+*.sln
+*.suo
+*.pyc

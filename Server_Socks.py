@@ -15,7 +15,7 @@ This is a simple webserver based on the sockets library
 '''
 import socket
 import os
-import Defs
+import modules.Defs
 import hashlib
 import logging as log
 
@@ -27,6 +27,7 @@ class Server_Socks:
   __host_port = 8080
   __ASSET_DIRECTORY = 'WWW'
   __SOCK_DRAWER_FILE_INDEX = {}
+  __VERSION__ =  "v0.1_Request"
 
   ##Maybe this will work for logging???
   opticon = log.getLogger(__name__)

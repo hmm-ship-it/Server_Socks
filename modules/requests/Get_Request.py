@@ -9,16 +9,21 @@ This module processes a get request. Checks the index, and sends a webpage
 
 import logging as log
 import hashlib
-import os, sys
-sys.path.append('D:\Programing\Personal\Server Socks')
-import Defs
-from Defs import http_header
+
+#Change this...
+#import os, sys
+#sys.path.append('D:\Programing\Personal\Server Socks')
+#import Defs
+print('__file__={0:<35} | __name__={1:<25} | __package__={2:<25}'.format(__file__,__name__,str(__package__)))
+from .. import Defs
 
 class Get_Request():
 
     def __init__(self):
         __VERSION__ = "v0.1_GET"
         opticon = log.getLogger(__name__)
+        print(self.__name__)
+        print(self.__package__)
 
 
     def get(server, request_hash, c_socket):
@@ -46,11 +51,11 @@ class Get_Request():
             return 'Error'
             
         try:
-            header = http_header(Defs.HTTP_11['status_200'], Defs.MIME_TYPES[mime], len(response))
+            header = server.http_header_obj(Defs.HTTP_11['status_200'], Defs.MIME_TYPES[mime], len(response))
         except Exception as e:
 
             log.debug('Header failed, likely invalid mime type. Add appropriate mime to defs.py }')
-            header = http_header(Defs.HTTP_11['status_200'], Defs.MIME_TYPES['.html'], len(response))
+            header = server.http_header_obj(Defs.HTTP_11['status_200'], Defs.MIME_TYPES['.html'], len(response))
 
         # test for valid response
         if response != b'is_null':
@@ -59,13 +64,3 @@ class Get_Request():
             c_socket.close()
 
         return
-
- #'''   def update_request(self, c_socket):
- #       ## Be sure to update this method in parallel with 'accept_connection'
- #       line_in = c_socket.recv(1024).decode('utf-8')
- #       print(c_address, end=" ")
- #       log.info("%s }", )
- #       full_request = line_in.strip().split('\r\n')
- #       request = full_request[0].split(' ')
- #       log.info("%s Request: %s }", str(c_address),str(request[:3]))
- #       return request, full_request;'''
