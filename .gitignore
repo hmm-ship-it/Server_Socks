@@ -15,3 +15,8 @@
 /__pycache__/Defs.cpython-38.pyc
 /__pycache__/Server_Socks.cpython-38.pyc
 /.vs/slnx.sqlite-journal
+/.vs/Server Socks/v16
+/__pycache__
+/modules/sanitize/__pycache__
+/modules/requests/__pycache__
+/modules/accept/__pycache__
