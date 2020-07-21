@@ -6,11 +6,10 @@ This is an extention of Server_Socks that implements an http server
 @License GPLv2
 '''
 #@TODO: It works, but basically just for the default case. Make sure it works for everything.
-#@TODO: Enforce stricter scope on things.
+#=========================Less important ==============================================
+#@TODO: Enforce stricter scope on things?
 #@TODO: Upgrade to httpv2 at some point, track timeouts for more efficient server/socket resource usage.
 #@TODO: (Use stateful connection for multiple transfers)
-#@TODO: Load index into RAM so it doesn't need to always read the file. (Maybe as an exception try and look for a file)
-#@TODO: Make objects once, and then reuse them, no point in reassigning them everytime.
 
 from Server_Socks import Server_Socks
 import hashlib
@@ -20,6 +19,7 @@ from modules.Defs import http_header
 import threading
 #import time
 import logging as log
+import atexit
 
 from modules.accept.Accept_Connection import Accept_Connection
 from modules.sanitize.Sanitize_Request import Sanitize_Request
@@ -29,7 +29,7 @@ from modules.requests.Request import Request
 class Http_Server(Server_Socks):
     opticon = log.getLogger(__name__)
     _thread_count = 0
-    __VERSION__ = "v0.1_Http_Server"
+    __VERSION__ = "v0.1"
 
     def __init__(self, runOptions=False, addr='127.0.0.1', port=8080):
         
@@ -47,6 +47,8 @@ class Http_Server(Server_Socks):
         self.launch_options(runOptions, addr, port)
         self.server_parameters()
         self.create_http_server()
+        atexit.register(log.warning,"Shutting down")
+        
 
 
     def server_parameters(self):
@@ -73,11 +75,14 @@ class Http_Server(Server_Socks):
 
         while 1:
             _thread_count = threading.enumerate()
+            #print(len(_thread_count))
             if len(_thread_count) < 50:
-                t1 = threading.Thread(target=self.modules_to_thread, args=(c,))
-                threads_list.append(t1)
-                t1.start()
-                #t1.join()
+                t2 = threading.Thread(target=self.modules_to_thread, args=(c,), daemon=True)
+                threads_list.append(t2)
+                t2.start()
+                t2.join()
+        
+        t2.join()
 
 if __name__=='__main__':
     logFormat = log.Formatter('[%(levelname)s] - %(asctime)s - %(message)s')

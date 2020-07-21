@@ -12,7 +12,7 @@ import hashlib
 class Sanitize_Request():
 
     def __init__(self):
-        __VERSION__ = "v0.1_HASH"
+        __VERSION__ = "v0.1"
         opticon = log.getLogger(__name__)
 
     def sanitize(request):

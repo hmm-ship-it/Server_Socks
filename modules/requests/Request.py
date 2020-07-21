@@ -12,7 +12,7 @@ import logging as log
 class Request():
     
     def __init__():
-        __VERSION__ = "v0.1_Request"
+        __VERSION__ = "v0.1"
         opticon = log.getLogger(__name__)
         
     def what_request(server, request_type, sani, c_socket, get_obj):

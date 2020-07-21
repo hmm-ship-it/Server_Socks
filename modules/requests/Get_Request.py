@@ -15,10 +15,10 @@ from .. import Defs
 class Get_Request():
 
     def __init__(self):
-        __VERSION__ = "v0.1_GET"
+        __VERSION__ = "v0.1"
         opticon = log.getLogger(__name__)
-        print(self.__name__)
-        print(self.__package__)
+        #print(self.__name__)
+        #print(self.__package__)
 
 
     def get(server, request_hash, c_socket):

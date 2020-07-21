@@ -6,18 +6,20 @@ This is a simple webserver based on the sockets library
 @License GPLv2
 
 @TODO: Make subclasses that define the server type.
-@TODO: Add a way for the server to be shutdown gracefully
-@TODO: How should I jail this code?
-@TODO: Get commandline arguments for setting ip and port
-@TODO: Don't rebuild the index every server restart....
-@TODO: Make the build_Index code more flexible..and protected
-@TODO: Create modules with known types of vulnerabilities for cyber security practice
+
+@TODO: Make it so arguments can be passed from the terminal
+#=========================Less important ==============================================
+@TODO: Is there a better way to terminate the server?
+@TODO: Is there a way to sandbox the code?
+@TODO: Make the build_Index code more protected?
 '''
 import socket
 import os
 import modules.Defs
 import hashlib
 import logging as log
+import threading
+import atexit
 
 class Server_Socks:
   'Defines a socket, port and address, to setup a server.'
@@ -27,7 +29,8 @@ class Server_Socks:
   __host_port = 8080
   __ASSET_DIRECTORY = 'WWW'
   __SOCK_DRAWER_FILE_INDEX = {}
-  __VERSION__ =  "v0.1_Request"
+  __VERSION__ =  "v0.1"
+  atexit.register(log.warning, "Server going down")
 
   ##Maybe this will work for logging???
   opticon = log.getLogger(__name__)
@@ -51,7 +54,7 @@ class Server_Socks:
       os.chdir(__cwd)
       return __cwd
     except:
-      log.warning('Setting the working directory failed. Is this Windows?}')
+      log.warning('Setting the working directory failed.}')
       __cwd = '.\\' + self.__ASSET_DIRECTORY
       os.chdir(__cwd)
       return __cwd
@@ -92,14 +95,30 @@ class Server_Socks:
         for line in fi:
           (key, value)=line.split(',')
           self.__SOCK_DRAWER_FILE_INDEX[key]=value
+        log.info("Server index has been changed")
         fi.close()
     except Exception as e:
       log.error('Setting the file index failed for some reason}')
 
+  #Looks to see if there is an index file
+  def _find_index_file(self):
+    try:
+      for files in os.listdir(path='.'):
+        if 'sock_drawer.index' in files:
+          log.info('Index found}')
+          return True
+    except Exception as e:
+        log.debug('Error when walking directory for sock_drawer.index}')
+    return False
+
   #This will build an index of files to serve.
   #WARNING THIS MUST BE RUN BEFORE ANYTHING ELSE...OTHERWISE IT WILL TRAVERSE
   #SOME RANDOM DIRECTORY.
-  def _build_Index(self):
+  def _build_Index(self, rebuild=False):
+
+    if self._find_index_file() == True and rebuild == False:
+            return;
+
     log.info('rebuilding index}')
     try:
       log.info('removing any prior index}')
@@ -180,11 +199,35 @@ class Server_Socks:
   #       if the ports and addr become some sort of list, or if you don't
   #       care what the values are after a socket is created.
   def create_Server(self):
+    t1 = threading.Thread(target=self.cmds, args =())
+    t1.start()
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     c.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
     c.bind((self.get_Addr(),self.get_Port()))
     c.listen(1)
+    print("[INFO] The Server is now listening for incoming connections")
     return c
+
+#The moment a socket is created this will be waiting for 'Exit'
+#to stop the server. There is probably a more graceful way to do this
+  def cmds(self):
+    print('HINT! Use \"build index\" to rebuild the index file and \"set index\" to change it.')
+    while True:
+        cli = input()
+        if cli == 'Exit' or cli =='exit' or cli =='stop' or cli =='Stop' or cli =='end' or cli =='End' or cli =='Quit' or cli =='quit':
+            print('\n Taking socks off')
+            log.warning("User has initiated server shutdown")
+            print("\n Hopefully you won't be losing any socks!")
+            os._exit(1)
+        elif cli == 'build index':
+            os.chdir('../')
+            self._build_Index(True);
+            self._set_Working_Directory()
+        elif cli == 'set index':
+            os.chdir('../')
+            self._set_File_Index()
+            self._set_Working_Directory()
+    return
 
 #def main(argv):
 #  try:

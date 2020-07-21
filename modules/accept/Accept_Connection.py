@@ -11,7 +11,7 @@ import logging as log
 
 class Accept_Connection():
     def __init__(self):
-        __VERSION__ = "v0.1_Accept"
+        __VERSION__ = "v0.1"
         opticon = log.getLogger(__name__)
 
     def accept(c):
